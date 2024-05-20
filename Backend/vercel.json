@@ -1,6 +1,1 @@
-{
-    "version":2,
-    "builds":[{"src":"./apiserver-zonji.js","use":
-    "@vercel/node"}],
-    "routes":[{"src":"/(.*)","dest":"/"}]
-}
+
