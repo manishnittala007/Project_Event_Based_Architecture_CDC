@@ -7,7 +7,7 @@ function App() {
 
   useEffect( () => {
     if (!listening) {
-      const events = new EventSource('http://localhost:3000/events');
+      const events = new EventSource('https://eventbasedarchtecturebackend.onrender.com/events');
 
       events.onmessage = (event) => {
         event.preventDefault();
