@@ -7,34 +7,50 @@ function App() {
 
   useEffect(() => {
     if (!listening) {
-      const events = new EventSource('https://event-based-architecture-backend.onrender.com/events');
-
+      const events = new EventSource('http://localhost:3000/events');
+  
       events.onmessage = (event) => {
         const parsedData = JSON.parse(event.data);
         console.log('Received data:', parsedData);
-
-        setQueries((queries) => {
-          // Check if the ID already exists in the queries array
-          const index = queries.findIndex(query => query.id === parsedData.id);
-          if (index !== -1) {
-            // If it exists, update the existing query
-            const updatedQueries = [...queries];
-            updatedQueries[index] = parsedData;
-            return updatedQueries;
-          } else {
-            // If it doesn't exist, add the new query
-            return queries.concat(parsedData);
-          }
-        });
+        
+        // Check if received data is an array or a single object
+        if (Array.isArray(parsedData)) {
+          // If it's an array, replace the entire state with the new array
+          setQueries(parsedData);
+        } else {
+          // If it's a single object
+          setQueries((prevQueries) => {
+            // Check if the ID already exists in the queries array
+            const queryFound = prevQueries.find((query) => query.id === parseInt(parsedData.id));
+            const index = queryFound.id;
+            console.log(queries);
+            console.log(prevQueries);
+            console.log(parsedData);
+            if (index!==-1) {
+              // If the ID exists, update the specific object
+              return prevQueries.map(query => 
+                query.id === parseInt(parsedData.id) ? parsedData : query
+              );
+            } else {
+              // If it doesn't exist, add the new query
+              console.log('else');
+              if (prevQueries.length < 3) {
+                // If there are less than 3 queries, add to the list
+                return [...prevQueries, parsedData];
+              } else {
+                // If there are 3 queries, replace the first one and shift the rest
+                return [parsedData, ...prevQueries.slice(1)];
+              }
+            }
+          });
+        }
       };
-
+  
       setListening(true);
     }
-  }, [listening, queries]);
-
-  // Filter queries to include only entries related to the questionnaire table
-  const questionnaireQueries = queries.filter(query => query.table === 'questionnaire');
-
+  }, [queries,listening]);
+  
+  // console.log(queries);
   return (
     <table className="stats-table">
       <thead>
@@ -47,12 +63,12 @@ function App() {
       </thead>
       <tbody>
         {
-          questionnaireQueries.map((queryObj, i) => (
+          queries?.map((queryObj, i) => (
             <tr key={i}>
-              <td>{queryObj.id}</td>
-              <td>{queryObj.name}</td>
-              <td>{queryObj.description}</td>
-              <td>{queryObj.table}</td>
+              <td>{queryObj?.id}</td>
+              <td>{queryObj?.name}</td>
+              <td>{queryObj?.description}</td>
+              <td>{queryObj?.table}</td>
             </tr>
           ))
         }
