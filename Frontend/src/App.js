@@ -7,7 +7,7 @@ function App() {
 
   useEffect(() => {
     if (!listening) {
-      const events = new EventSource('https://event-based-architecture-backend.onrender.com/events');
+      const events = new EventSource('http://localhost:3000/events');
   
       events.onmessage = (event) => {
         const parsedData = JSON.parse(event.data);
@@ -18,31 +18,36 @@ function App() {
           // If it's an array, replace the entire state with the new array
           setQueries(parsedData);
         } else {
-          // If it's a single object
-          setQueries((prevQueries) => {
-            // Check if the ID already exists in the queries array
-            const queryFound = prevQueries.find((query) => query.id === parseInt(parsedData.id));
-            const index = queryFound.id;
-            console.log(queries);
-            console.log(prevQueries);
-            console.log(parsedData);
-            if (index!==-1) {
-              // If the ID exists, update the specific object
-              return prevQueries.map(query => 
-                query.id === parseInt(parsedData.id) ? parsedData : query
-              );
-            } else {
-              // If it doesn't exist, add the new query
-              console.log('else');
-              if (prevQueries.length < 3) {
-                // If there are less than 3 queries, add to the list
-                return [...prevQueries, parsedData];
-              } else {
-                // If there are 3 queries, replace the first one and shift the rest
-                return [parsedData, ...prevQueries.slice(1)];
-              }
-            }
-          });
+          if (parsedData.table === 'questionnaire') {
+            // If it's a single object
+              setQueries((prevQueries) => {
+                // Check if the ID already exists in the queries array
+                const queryFound = prevQueries.find((query) => query.id === parseInt(parsedData.id));
+                const index = queryFound ? queryFound.id : -1;
+                console.log(queries);
+                console.log(prevQueries);
+                console.log(parsedData);
+                if (index !== -1) {
+                  // If the ID exists, update the specific object
+                  return prevQueries.map(query =>
+                    query.id === parseInt(parsedData.id) ? parsedData : query
+                  );
+                } else {
+                  // If it doesn't exist, add the new query
+                  console.log('else');
+                  if (prevQueries.length < 3) {
+                    // If there are less than 3 queries, add to the list
+                    console.log('else and if');
+                    return [...prevQueries, parsedData];
+                  } else {
+                    // If there are 3 queries, replace the first one and shift the rest
+                    console.log('else and else');
+                    return [parsedData, ...prevQueries.slice(1)];
+                  }
+                  // return [...prevQueries, parsedData];
+                }
+             });
+          }
         }
       };
   
@@ -58,7 +63,7 @@ function App() {
           <th>ID</th>
           <th>Name</th>
           <th>Description</th>
-          <th>Table</th>
+          {/* <th>Table</th> */}
         </tr>
       </thead>
       <tbody>
@@ -68,7 +73,7 @@ function App() {
               <td>{queryObj?.id}</td>
               <td>{queryObj?.name}</td>
               <td>{queryObj?.description}</td>
-              <td>{queryObj?.table}</td>
+              {/* <td>{queryObj?.table}</td> */}
             </tr>
           ))
         }
